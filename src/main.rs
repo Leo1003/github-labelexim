@@ -9,6 +9,7 @@ use tokio::runtime::Runtime;
 
 use config::Config;
 
+mod api;
 mod cmd;
 mod config;
 
@@ -37,11 +38,8 @@ fn main() -> AnyResult<()> {
 
 async fn main_import(args: ArgMatches<'static>) -> AnyResult<()> {
     let cfg_path = config::default_config_path();
-    let cfg = Config::load_or_create(&cfg_path).await
+    let cfg = Config::load(&cfg_path).await
         .context("Cannot load config")?;
-    if cfg.token.is_empty() {
-        bail!("Empty token");
-    }
 
     todo!("upload to github");
 
