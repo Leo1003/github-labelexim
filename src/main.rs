@@ -3,7 +3,7 @@ extern crate anyhow;
 #[macro_use]
 extern crate clap;
 
-use anyhow::{Result as AnyResult, Context as _};
+use anyhow::{Context as _, Result as AnyResult};
 use clap::{AppSettings, Arg, ArgMatches, SubCommand};
 use tokio::runtime::Runtime;
 
@@ -38,7 +38,8 @@ fn main() -> AnyResult<()> {
 
 async fn main_import(args: ArgMatches<'static>) -> AnyResult<()> {
     let cfg_path = config::default_config_path();
-    let cfg = Config::load(&cfg_path).await
+    let cfg = Config::load(&cfg_path)
+        .await
         .context("Cannot load config")?;
 
     todo!("upload to github");
@@ -48,7 +49,8 @@ async fn main_import(args: ArgMatches<'static>) -> AnyResult<()> {
 
 async fn main_export(args: ArgMatches<'static>) -> AnyResult<()> {
     let cfg_path = config::default_config_path();
-    let cfg = Config::load_or_create(&cfg_path).await
+    let cfg = Config::load_or_create(&cfg_path)
+        .await
         .context("Cannot load config")?;
 
     todo!("download from github");
@@ -58,7 +60,8 @@ async fn main_export(args: ArgMatches<'static>) -> AnyResult<()> {
 
 async fn main_login(args: ArgMatches<'static>) -> AnyResult<()> {
     let cfg_path = config::default_config_path();
-    let mut cfg = Config::load_or_create(&cfg_path).await
+    let mut cfg = Config::load_or_create(&cfg_path)
+        .await
         .context("Cannot load config")?;
 
     cfg.token = args.value_of("TOKEN").unwrap().to_owned();
@@ -70,7 +73,8 @@ async fn main_login(args: ArgMatches<'static>) -> AnyResult<()> {
 
 async fn main_logout(_args: ArgMatches<'static>) -> AnyResult<()> {
     let cfg_path = config::default_config_path();
-    let mut cfg = Config::load_or_create(&cfg_path).await
+    let mut cfg = Config::load_or_create(&cfg_path)
+        .await
         .context("Cannot load config")?;
 
     cfg.token.clear();

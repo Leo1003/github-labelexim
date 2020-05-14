@@ -1,7 +1,7 @@
 use anyhow::Result as AnyResult;
-use tokio::fs;
+use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
-use serde::{Serialize, Deserialize};
+use tokio::fs;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -36,8 +36,10 @@ impl Config {
 }
 
 pub fn default_config_path() -> PathBuf {
-    dirs::config_dir().map(|mut path| {
-        path.push("github-labelexim.json");
-        path
-    }).expect("Cannot find config path")
+    dirs::config_dir()
+        .map(|mut path| {
+            path.push("github-labelexim.json");
+            path
+        })
+        .expect("Cannot find config path")
 }
