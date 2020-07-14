@@ -2,7 +2,7 @@ use clap::{App, Arg, SubCommand};
 
 pub fn subcmd_import() -> App<'static, 'static> {
     SubCommand::with_name("import")
-        .help("Import labels from a JSON format data")
+        .about("Import labels from a JSON format data")
         .arg(
             Arg::with_name("override")
                 .long("override")
@@ -25,7 +25,7 @@ pub fn subcmd_import() -> App<'static, 'static> {
 
 pub fn subcmd_export() -> App<'static, 'static> {
     SubCommand::with_name("export")
-        .help("Export a repository's labels to a JSON format data")
+        .about("Export a repository's labels to a JSON format data")
         .arg(
             Arg::with_name("file")
                 .long("file")
@@ -43,7 +43,7 @@ pub fn subcmd_export() -> App<'static, 'static> {
 
 pub fn subcmd_login() -> App<'static, 'static> {
     SubCommand::with_name("login")
-        .help("Save Github personal access token into the config file")
+        .about("Save Github personal access token into the config file")
         .arg(
             Arg::with_name("TOKEN")
                 .required(true)
@@ -53,5 +53,5 @@ pub fn subcmd_login() -> App<'static, 'static> {
 }
 
 pub fn subcmd_logout() -> App<'static, 'static> {
-    SubCommand::with_name("logout").help("Remove previous saved login token")
+    SubCommand::with_name("logout").about("Remove previous saved login token")
 }

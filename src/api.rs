@@ -1,6 +1,7 @@
+#![allow(unused)]
 use lazy_static::lazy_static;
 use regex::Regex;
-use reqwest::{Client, Error as ReqError, Request};
+use reqwest::{header, Client, Error as ReqError, Request};
 use rgb::RGB;
 use serde::{Deserialize, Serialize};
 
@@ -62,16 +63,26 @@ impl<'l> LabelUpdate<'l> {
 
 #[derive(Clone, Debug, Default)]
 pub struct GithubClient {
-    token_hdr: String,
     client: Client,
 }
 
 impl GithubClient {
-    fn new(token: &str) -> Self {
-        GithubClient {
-            token_hdr: format!("token {}", token),
-            client: Client::new(),
+    pub fn new(token: &str) -> Self {
+        let mut headers = header::HeaderMap::new();
+
+        if !token.is_empty() {
+            headers.insert(
+                header::AUTHORIZATION,
+                header::HeaderValue::from_str(&format!("token {}", token)).unwrap(),
+            );
         }
+
+        let c = Client::builder()
+            .user_agent("curl/7.71.1")
+            .default_headers(headers)
+            .build()
+            .unwrap();
+        GithubClient { client: c }
     }
 }
 
@@ -79,7 +90,6 @@ impl GithubClient {
     pub async fn check_token(&self) -> Result<(), ReqError> {
         self.client
             .get("https://api.github.com/user")
-            .header(reqwest::header::AUTHORIZATION, &self.token_hdr)
             .send()
             .await?
             .error_for_status()?;
@@ -88,8 +98,10 @@ impl GithubClient {
 
     pub async fn get_labels(&self, owner: &str, repo: &str) -> Result<Vec<Label>, ReqError> {
         self.client
-            .get(&format!("/repos/{}/{}/labels", owner, repo))
-            .header(reqwest::header::AUTHORIZATION, &self.token_hdr)
+            .get(&format!(
+                "https://api.github.com/repos/{}/{}/labels",
+                owner, repo
+            ))
             .send()
             .await?
             .error_for_status()?
@@ -99,8 +111,10 @@ impl GithubClient {
 
     pub async fn new_label(&self, owner: &str, repo: &str, label: &Label) -> Result<(), ReqError> {
         self.client
-            .post(&format!("/repos/{}/{}/labels", owner, repo))
-            .header(reqwest::header::AUTHORIZATION, &self.token_hdr)
+            .post(&format!(
+                "https://api.github.com/repos/{}/{}/labels",
+                owner, repo
+            ))
             .json(label)
             .send()
             .await?
@@ -115,8 +129,10 @@ impl GithubClient {
         label: &Label,
     ) -> Result<(), ReqError> {
         self.client
-            .patch(&format!("/repos/{}/{}/labels/{}", owner, repo, &label.name))
-            .header(reqwest::header::AUTHORIZATION, &self.token_hdr)
+            .patch(&format!(
+                "https://api.github.com/repos/{}/{}/labels/{}",
+                owner, repo, &label.name
+            ))
             .json(&LabelUpdate::without_name(label))
             .send()
             .await?
@@ -132,8 +148,10 @@ impl GithubClient {
         label: &Label,
     ) -> Result<(), ReqError> {
         self.client
-            .patch(&format!("/repos/{}/{}/labels/{}", owner, repo, name))
-            .header(reqwest::header::AUTHORIZATION, &self.token_hdr)
+            .patch(&format!(
+                "https://api.github.com/repos/{}/{}/labels/{}",
+                owner, repo, name
+            ))
             .json(&LabelUpdate::with_name(label))
             .send()
             .await?
