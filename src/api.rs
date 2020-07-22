@@ -29,10 +29,10 @@ lazy_static! {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Label {
-    name: String,
-    description: String,
+    pub name: String,
+    pub description: String,
     #[serde(with = "hex_color")]
-    color: RGB<u8>,
+    pub color: RGB<u8>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -128,7 +128,7 @@ impl GithubClient {
         repo: &str,
         label: &Label,
     ) -> Result<(), ReqError> {
-        self.client
+        let res = self.client
             .patch(&format!(
                 "https://api.github.com/repos/{}/{}/labels/{}",
                 owner, repo, &label.name
@@ -153,6 +153,23 @@ impl GithubClient {
                 owner, repo, name
             ))
             .json(&LabelUpdate::with_name(label))
+            .send()
+            .await?
+            .error_for_status()?;
+        Ok(())
+    }
+
+    pub async fn remove_label(
+        &self,
+        owner: &str,
+        repo: &str,
+        name: &str,
+    ) -> Result<(), ReqError> {
+        self.client
+            .delete(&format!(
+                "https://api.github.com/repos/{}/{}/labels/{}",
+                owner, repo, name
+            ))
             .send()
             .await?
             .error_for_status()?;
